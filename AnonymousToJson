@@ -1,0 +1,92 @@
+void Main()
+{
+	var anon = new {
+		wow = new object[]{
+			new {
+				key = 
+				new {
+					that = "is", 
+					json = new string[]{"this", "is", "an", "array", "of", "objects"},
+					numbers = new int[]{1,2,3,4,5},
+					idk = new idk("random", 4)
+				}
+			}
+		}
+	};
+	
+	//anon.wow[0].Dump();
+	string payload = JsonSerializer.Serialize(anon.wow[0]);
+	
+	using (JsonDocument document = JsonDocument.Parse(payload))
+	{
+		Dictionary<string, Dictionary<string, object>> d = new();
+	    JsonElement root = document.RootElement;
+		GetChildElement(root.EnumerateObject(), ref d);
+		d.Dump();
+	}
+}
+
+
+private void GetChildElement(IEnumerable ele, ref Dictionary<string, Dictionary<string, object>> d, string key = null)
+{
+	Dictionary<string, object> child = new();
+	IEnumerator itter = ele.GetEnumerator();
+	while(itter.MoveNext())
+	{
+		if(itter.Current is JsonProperty)
+		{
+			JsonValueKind jprop = ((JsonProperty)itter.Current).Value.ValueKind;
+			if(jprop is JsonValueKind.Object)
+			{
+			}
+			switch(jprop)
+			{
+				case JsonValueKind.Object:
+					//if (key is not null && !d.ContainsKey(key))
+					//{
+					//	d.Add(key != null ? key : ((JsonProperty)itter.Current).Name, "adfasdf");
+					//}
+					//if (key is null)
+					//{
+					//	d.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value);
+					//}
+					//
+					GetChildElement(((JsonProperty)itter.Current).Value.EnumerateObject(), ref d, ((JsonProperty)itter.Current).Name.ToString());
+				break;
+				case JsonValueKind.String:
+					child.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.ToString());
+				break;
+				case JsonValueKind.Number:
+					if (!child.ContainsKey(key))
+					{
+						child.Add(key != null ? key : ((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.ToString());
+					}
+					
+					else if (d.ContainsKey(key))
+					{
+						child[key] += ((JsonProperty)itter.Current).Value.ToString();
+					}
+				break;
+				case JsonValueKind.Array:
+					child.Add(((JsonProperty)itter.Current).Name, new string[] {((JsonProperty)itter.Current).Value.ToString()}); //perform safe cast via EnumerateArray ?
+				break;
+				default:
+					((JsonProperty)itter.Current).Value.Dump("asdfasdfasdfasdfa");
+					child.Add(((JsonProperty)itter.Current).Name, JsonValueKind.Undefined);
+				break;
+			}
+		}
+	}
+	
+	if(key is not null)
+	{
+	d.Add(key, child);
+	}
+	
+}
+// You can define other methods, fields, classes and namespaces here
+public record idk
+(
+	string random,
+	int t
+);
