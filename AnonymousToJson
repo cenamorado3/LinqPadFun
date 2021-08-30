@@ -1,33 +1,34 @@
 void Main()
 {
-	var anon = new {
-		wow = new object[]{
-			new {
-				key = 
-				new {
-					that = "is", 
-					json = new string[]{"this", "is", "an", "array", "of", "objects"},
-					numbers = new int[]{1,2,3,4,5},
-					idk = new idk("random", 4)
-				}
-			}
+	var anon = new object[]{
+		new {
+			that = "is", 
+			json = new string[]{"this", "is", "an", "array", "of", "objects"},
+			numbers = new int[]{1,2,3,4,5},
+			idk1 = new idk("random", 4)
+		},
+		new {
+			str = "is", 
+			strarr = new string[]{"this", "is", "an", "array", "of", "objects"},
+			intarr = new int[]{1,2,3,4,5},
+			idk2 = new idk("asdf", 4)
 		}
 	};
-	
-	//anon.wow[0].Dump();
-	string payload = JsonSerializer.Serialize(anon.wow[0]);
-	
-	using (JsonDocument document = JsonDocument.Parse(payload))
+	Dictionary<string, Dictionary<string, object>> d = new();
+	for(int i = 0;anon.Length > i; i+=1)
 	{
-		Dictionary<string, Dictionary<string, object>> d = new();
-	    JsonElement root = document.RootElement;
-		GetChildElement(root.EnumerateObject(), ref d);
-		d.Dump();
+		string payload = JsonSerializer.Serialize(anon[i]);
+		using (JsonDocument document = JsonDocument.Parse(payload))
+		{
+		    JsonElement root = document.RootElement;
+			d.Add(i.ToString(), GetChildElement(root.EnumerateObject(), i.ToString()).First()) ;
+		}
 	}
+	d.Dump();
 }
 
 
-private void GetChildElement(IEnumerable ele, ref Dictionary<string, Dictionary<string, object>> d, string key = null)
+private IEnumerable<Dictionary<string, object>> GetChildElement(IEnumerable ele, string key = null)
 {
 	Dictionary<string, object> child = new();
 	IEnumerator itter = ele.GetEnumerator();
@@ -35,23 +36,29 @@ private void GetChildElement(IEnumerable ele, ref Dictionary<string, Dictionary<
 	{
 		if(itter.Current is JsonProperty)
 		{
+		
 			JsonValueKind jprop = ((JsonProperty)itter.Current).Value.ValueKind;
-			if(jprop is JsonValueKind.Object)
-			{
-			}
 			switch(jprop)
 			{
 				case JsonValueKind.Object:
-					//if (key is not null && !d.ContainsKey(key))
-					//{
-					//	d.Add(key != null ? key : ((JsonProperty)itter.Current).Name, "adfasdf");
-					//}
-					//if (key is null)
-					//{
-					//	d.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value);
-					//}
-					//
-					GetChildElement(((JsonProperty)itter.Current).Value.EnumerateObject(), ref d, ((JsonProperty)itter.Current).Name.ToString());
+					//GetChildElement(((JsonProperty)itter.Current).Value.EnumerateObject(), ((JsonProperty)itter.Current).Name.ToString());
+					
+					//the below is handling recursion edge case, consolidate later...
+					string payload = JsonSerializer.Serialize(((JsonProperty)itter.Current).Value);
+					Dictionary<string, object> o = ParseDoc(payload, ((JsonProperty)itter.Current).Name).First();
+					//have to merge here....
+					foreach(var k in o.Keys)
+					{
+						if(!child.ContainsKey(((JsonProperty)itter.Current).Name))
+						{
+							child.Add(((JsonProperty)itter.Current).Name, o);
+						}
+						if(child.ContainsKey(key))
+						{
+							((Dictionary<string, object>)child[k]).Add(((JsonProperty)itter.Current).Name,o);
+						}
+					}
+					
 				break;
 				case JsonValueKind.String:
 					child.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.ToString());
@@ -59,10 +66,10 @@ private void GetChildElement(IEnumerable ele, ref Dictionary<string, Dictionary<
 				case JsonValueKind.Number:
 					if (!child.ContainsKey(key))
 					{
-						child.Add(key != null ? key : ((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.ToString());
+						child.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.ToString());
 					}
 					
-					else if (d.ContainsKey(key))
+					else if (child.ContainsKey(key))
 					{
 						child[key] += ((JsonProperty)itter.Current).Value.ToString();
 					}
@@ -71,18 +78,18 @@ private void GetChildElement(IEnumerable ele, ref Dictionary<string, Dictionary<
 					child.Add(((JsonProperty)itter.Current).Name, new string[] {((JsonProperty)itter.Current).Value.ToString()}); //perform safe cast via EnumerateArray ?
 				break;
 				default:
-					((JsonProperty)itter.Current).Value.Dump("asdfasdfasdfasdfa");
+					((JsonProperty)itter.Current).Value.Dump(">>>>>>>>>>>>>>>>>>>UNDEFINED<<<<<<<<<<<<<<");
 					child.Add(((JsonProperty)itter.Current).Name, JsonValueKind.Undefined);
 				break;
 			}
 		}
 	}
 	
-	if(key is not null)
-	{
-	d.Add(key, child);
-	}
-	
+	//if(key is not null)
+	//{
+	//	d.Add(key, child);
+	//}
+	yield return child;
 }
 // You can define other methods, fields, classes and namespaces here
 public record idk
@@ -90,3 +97,14 @@ public record idk
 	string random,
 	int t
 );
+
+
+IEnumerable<Dictionary<string, object>> ParseDoc(string payload, string key = "0")
+{
+	using (JsonDocument document = JsonDocument.Parse(payload))
+	{
+		Dictionary<string, Dictionary<string, object>> d = new();
+	    JsonElement root = document.RootElement;
+		yield return GetChildElement(root.EnumerateObject(), key).First();
+	}
+}
