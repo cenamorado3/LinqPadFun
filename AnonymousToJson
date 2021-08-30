@@ -1,3 +1,6 @@
+//This script creates a C# anonymous object with JSON serialization in mind, while deserializing the "return" object as a deep clone as Dictionary<string, Dictionary<string, object>>
+//It needs refinement, though this should provide a lightweight solution similar to Pythons loads and dumps functions, which I do not currently know of a way to natively do in C#
+
 void Main()
 {
 	var anon = new object[]{
