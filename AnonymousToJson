@@ -8,13 +8,13 @@ void Main()
 			that = "is", 
 			json = new string[]{"this", "is", "an", "array", "of", "objects"},
 			numbers = new int[]{1,2,3,4,5},
-			idk1 = new idk("random", 4)
+			blah1 = new idk("blah1", 4)
 		},
 		new {
 			str = "is", 
 			strarr = new string[]{"this", "is", "an", "array", "of", "objects"},
 			intarr = new int[]{1,2,3,4,5},
-			idk2 = new idk("asdf", 4)
+			blah2 = new idk("blah2", 4)
 		}
 	};
 	Dictionary<string, Dictionary<string, object>> d = new();
@@ -27,6 +27,12 @@ void Main()
 			d.Add(i.ToString(), GetChildElement(root.EnumerateObject(), i.ToString()).First()) ;
 		}
 	}
+	foreach(var kvp in ((Dictionary<string, object>)d["0"]["blah1"]))
+	{
+		kvp.Dump();
+	}
+	((Dictionary<string, object>)d["0"]["blah1"])["t"] = Convert.ToInt32(((Dictionary<string, object>)d["0"]["blah1"])["t"]) * 2;//clunky casting because we can "dot walk" to access keys, no need to itter if you know what you are looking for
+
 	d.Dump();
 }
 
@@ -48,19 +54,8 @@ private IEnumerable<Dictionary<string, object>> GetChildElement(IEnumerable ele,
 					
 					//the below is handling recursion edge case, consolidate later...
 					string payload = JsonSerializer.Serialize(((JsonProperty)itter.Current).Value);
-					Dictionary<string, object> o = ParseDoc(payload, ((JsonProperty)itter.Current).Name).First();
+					child.Add(((JsonProperty)itter.Current).Name, ParseDoc(payload, ((JsonProperty)itter.Current).Name).First());
 					//have to merge here....
-					foreach(var k in o.Keys)
-					{
-						if(!child.ContainsKey(((JsonProperty)itter.Current).Name))
-						{
-							child.Add(((JsonProperty)itter.Current).Name, o);
-						}
-						if(child.ContainsKey(key))
-						{
-							((Dictionary<string, object>)child[k]).Add(((JsonProperty)itter.Current).Name,o);
-						}
-					}
 					
 				break;
 				case JsonValueKind.String:
@@ -106,7 +101,6 @@ IEnumerable<Dictionary<string, object>> ParseDoc(string payload, string key = "0
 {
 	using (JsonDocument document = JsonDocument.Parse(payload))
 	{
-		Dictionary<string, Dictionary<string, object>> d = new();
 	    JsonElement root = document.RootElement;
 		yield return GetChildElement(root.EnumerateObject(), key).First();
 	}
