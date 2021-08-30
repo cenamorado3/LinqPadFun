@@ -31,7 +31,7 @@ void Main()
 	{
 		kvp.Dump();
 	}
-	((Dictionary<string, object>)d["0"]["blah1"])["t"] = Convert.ToInt32(((Dictionary<string, object>)d["0"]["blah1"])["t"]) * 2;//clunky casting because we can "dot walk" to access keys, no need to itter if you know what you are looking for
+	((Dictionary<string, object>)d["0"]["blah1"])["t"] = Convert.ToInt32(((Dictionary<string, object>)d["0"]["blah1"])["t"]) * 2;//clunky casting but we can "dot walk" to access keys, no need to itter if you know what you are looking for
 
 	d.Dump();
 }
