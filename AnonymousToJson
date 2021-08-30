@@ -15,8 +15,12 @@ void Main()
 			strarr = new string[]{"this", "is", "an", "array", "of", "objects"},
 			intarr = new int[]{1,2,3,4,5},
 			blah2 = new idk("blah2", 4)
-		}
+		},
+		new { a = new { b = new { c = 3}}}
 	};
+	
+	
+	
 	Dictionary<string, Dictionary<string, object>> d = new();
 	for(int i = 0;anon.Length > i; i+=1)
 	{
@@ -26,6 +30,7 @@ void Main()
 		    JsonElement root = document.RootElement;
 			d.Add(i.ToString(), GetChildElement(root.EnumerateObject(), i.ToString()).First()) ;
 		}
+		
 	}
 	foreach(var kvp in ((Dictionary<string, object>)d["0"]["blah1"]))
 	{
@@ -45,7 +50,6 @@ private IEnumerable<Dictionary<string, object>> GetChildElement(IEnumerable ele,
 	{
 		if(itter.Current is JsonProperty)
 		{
-		
 			JsonValueKind jprop = ((JsonProperty)itter.Current).Value.ValueKind;
 			switch(jprop)
 			{
@@ -64,7 +68,7 @@ private IEnumerable<Dictionary<string, object>> GetChildElement(IEnumerable ele,
 				case JsonValueKind.Number:
 					if (!child.ContainsKey(key))
 					{
-						child.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.ToString());
+						child.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.GetInt32());
 					}
 					
 					else if (child.ContainsKey(key))
@@ -73,8 +77,34 @@ private IEnumerable<Dictionary<string, object>> GetChildElement(IEnumerable ele,
 					}
 				break;
 				case JsonValueKind.Array:
-					child.Add(((JsonProperty)itter.Current).Name, new string[] {((JsonProperty)itter.Current).Value.ToString()}); //perform safe cast via EnumerateArray ?
-				break;
+						JsonValueKind arrType = ((JsonProperty)itter.Current).Value[0].ValueKind;
+							switch(arrType)
+							{
+								case JsonValueKind.String:
+									IEnumerable arrEnumS = ((JsonProperty)itter.Current).Value.EnumerateArray();
+									IEnumerator arrItterS = arrEnumS.GetEnumerator();
+									List<string> s = new();
+									while(arrItterS.MoveNext())
+									{
+										s.Add(arrItterS.Current.ToString());
+									}
+									child.Add(((JsonProperty)itter.Current).Name, s.ToArray());
+								break;
+								case JsonValueKind.Number:
+									IEnumerable arrEnumI = ((JsonProperty)itter.Current).Value.EnumerateArray();
+									IEnumerator arrItterI = arrEnumI.GetEnumerator();
+									List<int> i = new();
+									while(arrItterI.MoveNext())
+									{
+										i.Add(((JsonElement)arrItterI.Current).GetInt32());
+									}
+									child.Add(((JsonProperty)itter.Current).Name, i.ToArray());
+								break;
+								default:
+									child.Add(((JsonProperty)itter.Current).Name, new string[] {((JsonProperty)itter.Current).Value.ToString()}); //perform safe cast via EnumerateArray ?
+								break;
+							}
+					break;
 				default:
 					((JsonProperty)itter.Current).Value.Dump(">>>>>>>>>>>>>>>>>>>UNDEFINED<<<<<<<<<<<<<<");
 					child.Add(((JsonProperty)itter.Current).Name, JsonValueKind.Undefined);
