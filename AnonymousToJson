@@ -54,13 +54,9 @@ private IEnumerable<Dictionary<string, object>> GetChildElement(IEnumerable ele,
 			switch(jprop)
 			{
 				case JsonValueKind.Object:
-					//GetChildElement(((JsonProperty)itter.Current).Value.EnumerateObject(), ((JsonProperty)itter.Current).Name.ToString());
-					
 					//the below is handling recursion edge case, consolidate later...
 					string payload = JsonSerializer.Serialize(((JsonProperty)itter.Current).Value);
 					child.Add(((JsonProperty)itter.Current).Name, ParseDoc(payload, ((JsonProperty)itter.Current).Name).First());
-					//have to merge here....
-					
 				break;
 				case JsonValueKind.String:
 					child.Add(((JsonProperty)itter.Current).Name, ((JsonProperty)itter.Current).Value.ToString());
