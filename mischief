@@ -1,6 +1,6 @@
 void Main()
 {
-	ClassAB aLock = new();
+	ClassA aLock = new();
 	aLock.secret = aLock.Encrypt("ClassA UNENC");
 	ClassAB abLock = new();
 	abLock.secret = abLock.Encrypt("ClassAB UNENC");
