@@ -1,3 +1,6 @@
+//every vision, has its door.
+//every lock, has its key.
+//yet there is no value, in this meaning.
 void Main()
 {
 	ClassA aLock = new();
