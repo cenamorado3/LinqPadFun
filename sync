@@ -1,0 +1,64 @@
+//synschonization of task/threads with locks/SAGA design pattern
+async void Main()
+{
+    for (int t = 0; t < 500; t+=1)
+    {
+        var tasks = new Task[99];
+        for (int i = 0; i < tasks.Length; i+=3)
+        {
+            tasks[i] = DoA();
+			tasks[i+1] = DoB();
+			tasks[i+2] = DoC();
+        }
+        await Task.WhenAll(tasks);
+		if(bal != 33) bal.Dump(); //<----this will only occur when the value is not correct for a single unit of work bal = x / y, where n is the amount of work, y is number of task the make up one unit of work, in this case, 99/3=33 (a mod 0 result for simplicity)
+		bal = 0;
+	}
+}
+object sqlLock = new object();
+int bal = 0;
+
+//this function is called everytime "DoC" has completed, signaling that the inner for loop, i, representing one unit of work, composed of, in this case, 3 task.
+//The outer loop, t, represents an epoch, the completetion of a unit of work
+//abstractly this could sigal the succes or failure of any action or event
+void update()
+{
+//what happens if you remove this lock?
+	lock( sqlLock )
+		{
+		bal += 1;
+	}
+//after seeing the results, consider the frequency of updates.
+}
+// You can define other methods, fields, classes and namespaces here
+public Task<List<string>> DoA()
+		{
+		lock( sqlLock )
+			{
+				return Task.Run( () =>
+				{
+					return new List<string>() { "TODO" };
+				} );
+			}
+		}
+		public Task<List<string>> DoB()
+		{
+			lock( sqlLock )
+			{
+				return Task.Run( () =>
+				{
+					return new List<string>() { "TODO" };
+				} );
+			}
+		}
+		public Task<List<string>> DoC()
+		{
+			lock( sqlLock )
+			{
+				return Task.Run( () =>
+				{
+					update();
+					return new List<string>() { "TODO" };
+				} );
+			}
+		}
