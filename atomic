@@ -1,0 +1,67 @@
+//WIP
+async void Main()
+{
+	Atomic atom = new();
+	atom.Update += ( () => atom.balance += 1);
+	await atom.Work();
+}
+class Atomic
+{
+	async public Task Work()
+	{
+	    for (int t = 0; t < 500; t+=1)
+	    {
+	        var tasks = new Task[99];
+	        for (int i = 0; i < tasks.Length; i+=3)
+	        {
+	            tasks[i] = DoA();
+				tasks[i+1] = DoB();
+				tasks[i+2] = DoC();
+	        }
+	        await Task.WhenAll(tasks);
+			if(balance != 33) balance.Dump(); 
+			//balance = 0;
+		}
+	}
+	public event Action Update;
+	public void fire() => Update?.Invoke();
+	int bal = 0;
+	public int balance
+	{
+		get
+		{
+			return bal;
+		}
+		set
+		{
+			bal = value;
+			fire();
+		}
+	}
+
+	
+	public Task<List<string>> DoA()
+	{
+		return Task.Run( () =>
+		{
+			return new List<string>() { "TODO" };
+		} );
+	}
+
+	public Task<List<string>> DoB()
+	{
+		return Task.Run( () =>
+		{
+			return new List<string>() { "TODO" };
+		} );
+	}
+
+	public Task<List<string>> DoC()
+	{
+		return Task.Run( () =>
+		{
+		fire();
+			return new List<string>() { "TODO" };
+		} );
+	}
+}
