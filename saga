@@ -1,3 +1,4 @@
+//https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga
 //is this right?
 Atomic atom = new();
 ///this function is severly abstracted
