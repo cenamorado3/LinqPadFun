@@ -1,7 +1,7 @@
-//synschonization of task/threads with locks/SAGA design pattern?
+//synschonization of task/threads with locks, SAGA design pattern?
 async void Main()
 {
-    for (int t = 0; t < 500; t+=1)
+    for (int t = 0; t < 50000; t+=1)
     {
         var tasks = new Task[99];
         for (int i = 0; i < tasks.Length; i+=3)
@@ -11,54 +11,54 @@ async void Main()
 			tasks[i+2] = DoC();
         }
         await Task.WhenAll(tasks);
-		if(bal != 33) bal.Dump(); //<----this will only occur when the value is not correct for a single unit of work bal = x / y, where n is the amount of work, y is number of task the make up one unit of work, in this case, 99/3=33 (a mod 0 result for simplicity)
+		if(bal != 33) bal.Dump(); //<----this will only occur when the value is not correct for a single unit of work
 		bal = 0;
 	}
 }
-object sqlLock = new object();
+object Lock = new object();
 int bal = 0;
 
-//this function is called everytime "DoC" has completed, signaling that the inner for loop, i, representing one unit of work, composed of, in this case, 3 task.
-//The outer loop, t, represents an epoch, the completetion of a unit of work
+//this function is called everytime "DoC" has completed, signaling that the inner for loop, i, representing the work, composed of, in this case, 99 task.
+//The outer loop, t, represents an epoch, the completion of one unit of work,
 //abstractly this could signal the succes or failure of any action or event
 void update()
 {
 //what happens if you remove this lock?
-	lock( sqlLock )
-		{
+	lock( Lock )
+	{
 		bal += 1;
 	}
-//after seeing the results, consider the frequency of updates.
+//after seeing the results, consider the frequency of updates, add a few figures to the t
 }
 // You can define other methods, fields, classes and namespaces here
 public Task<List<string>> DoA()
+{
+	lock( Lock )
+	{
+		return Task.Run( () =>
 		{
-		lock( sqlLock )
-			{
-				return Task.Run( () =>
-				{
-					return new List<string>() { "TODO" };
-				} );
-			}
-		}
-		public Task<List<string>> DoB()
+			return new List<string>() { "TODO" };
+		} );
+	}
+}
+public Task<List<string>> DoB()
+{
+	lock( Lock )
+	{
+		return Task.Run( () =>
 		{
-			lock( sqlLock )
-			{
-				return Task.Run( () =>
-				{
-					return new List<string>() { "TODO" };
-				} );
-			}
-		}
-		public Task<List<string>> DoC()
+			return new List<string>() { "TODO" };
+		} );
+	}
+}
+public Task<List<string>> DoC()
+{
+	lock( Lock )
+	{
+		return Task.Run( () =>
 		{
-			lock( sqlLock )
-			{
-				return Task.Run( () =>
-				{
-					update();
-					return new List<string>() { "TODO" };
-				} );
-			}
-		}
+			update();
+			return new List<string>() { "TODO" };
+		} );
+	}
+}
