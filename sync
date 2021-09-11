@@ -20,7 +20,7 @@ int bal = 0;
 
 //this function is called everytime "DoC" has completed, signaling that the inner for loop, i, representing one unit of work, composed of, in this case, 3 task.
 //The outer loop, t, represents an epoch, the completetion of a unit of work
-//abstractly this could sigal the succes or failure of any action or event
+//abstractly this could signal the succes or failure of any action or event
 void update()
 {
 //what happens if you remove this lock?
