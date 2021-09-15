@@ -23,6 +23,7 @@ void Main()
 			}
 		)
 	);
+	 barrier.Dispose();
 }
 
 // You can define other methods, fields, classes and namespaces here
