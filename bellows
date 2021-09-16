@@ -1,20 +1,35 @@
-static void Main()
+//volatile int c = 0; //taking the volatile approach and was not far beind the interlock approach, but similiar results to using t without meticulous consideration
+void Main()
 {
-	int c = 0;
+	int c= 0;
 	object o = new();
 	Task[] tar = new Task[5];
-	for(int t = 0; t < tar.Length; t ++)
+	for(int t = 0; t < tar.Length; t ++)//using t is madness
 	{
 	    tar[t] = Task.Factory.StartNew( (Object obj ) => 
 		{
+		
 			lock(o)
 			{
 			Metal m = ((Metal)obj);
-			m.m = c % 2 == 0 ? "iron" : "carbon"; //if you use t instead of the initialized i, m.i, value, you have a race condition with far from expected results
-			Interlocked.Increment(ref c);//by using the thread safe interlocked, an auxillary indexer/pointer, and a lock, expected results can be achieved or by using the init value
+			
+			
+			//switch(c)
+			//{
+			//	case 0:
+			//		c= 1;
+			//		break;
+			//	case 1:
+			//		c = 0;
+			//		break;
+			//	default:
+			//		break;
+			//}
+			m.m = m.i % 2 == 0 ? "iron" : "carbon"; //if you use t instead of the initialized i, m.i, value, you have a race condition with far from expected results
+			Interlocked.Increment(ref c);//by using the thread safe interlocked, an auxillary indexer/pointer, and a lock, expected results can be achieved, with inconsistency
 			}//removing the lock will break the atomicity 
 	   	},
-	   	new Metal(){i=t}
+	   	new Metal(){i=t} // using the init value yields the greatest consistency, due to its immutable nature which is thread safe by virtue, the same result can happen with meticulous care when setting a new value
 		);
 	}
 	Task.WaitAll(tar);
@@ -24,7 +39,7 @@ static void Main()
 	}
 }
 
-record Metal{public string m{get;set;}public int i{get;set;}=0;}
+record Metal{public string m{get;set;}public int i{get;init;}=0;}
 
 public static class Metallurgy
 {
@@ -34,3 +49,4 @@ public static class Metallurgy
 	}
 }
 
+//shits hot
