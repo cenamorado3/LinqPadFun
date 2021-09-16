@@ -1,0 +1,36 @@
+static void Main()
+{
+	int c = 0;
+	object o = new();
+	Task[] tar = new Task[5];
+	for(int t = 0; t < tar.Length; t ++)
+	{
+	    tar[t] = Task.Factory.StartNew( (Object obj ) => 
+		{
+			lock(o)
+			{
+			Metal m = ((Metal)obj);
+			m.m = c % 2 == 0 ? "iron" : "carbon"; //if you use t instead of the initialized i, m.i, value, you have a race condition with far from expected results
+			Interlocked.Increment(ref c);//by using the thread safe interlocked, an auxillary indexer/pointer, and a lock, expected results can be achieved or by using the init value
+			}//removing the lock will break the atomicity 
+	   	},
+	   	new Metal(){i=t}
+		);
+	}
+	Task.WaitAll(tar);
+	foreach(Task t in tar)
+	{
+		t.AsyncState.Forge();
+	}
+}
+
+record Metal{public string m{get;set;}public int i{get;set;}=0;}
+
+public static class Metallurgy
+{
+	public static void Forge(this object obj)
+	{
+		obj.Dump();
+	}
+}
+
