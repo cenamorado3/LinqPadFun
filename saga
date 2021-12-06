@@ -10,6 +10,7 @@ void Saga()//invocation
 	}
 	else
 	{
+		//GIVE ME MY QUANTUM
 		atom.balance += 1;//otherwise, perform the transaction, increment the balance. "service completed, process payment, send to shipping"
 	}
 }
