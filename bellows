@@ -1,5 +1,6 @@
 // Disable the "reference to volatile field not treated as volatile" error.
 //the key may be to disable the pragma warning, since now we can ref a volatile variable since it will not be treated as volatile within the scope of the function.
+//note to future self: it is likely you must still use some sort of readwritelock(slim) at the lowest level.
 #https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs0420
 //https://referencesource.microsoft.com/#mscorlib/system/threading/Tasks/Task.cs,31
 #pragma warning disable 0420
@@ -57,3 +58,4 @@ public static class Metallurgy
 }
 
 //shits hot
+https://referencesource.microsoft.com/#mscorlib/system/Runtime/InteropServices/ComEventsHelper.cs,198
