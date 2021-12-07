@@ -11,6 +11,7 @@ void Saga()//invocation
 	else
 	{
 		//GIVE ME MY QUANTUM
+		//https://referencesource.microsoft.com/#System.Core/system/threading/ReaderWriterLockSlim/ReaderWriterLockSlim.cs,1666
 		atom.balance += 1;//otherwise, perform the transaction, increment the balance. "service completed, process payment, send to shipping"
 	}
 }
