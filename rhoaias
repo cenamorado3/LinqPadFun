@@ -27,7 +27,7 @@ void Main()
 }
 
 // You can define other methods, fields, classes and namespaces here
-
+//YOU SHALL NOT PASS!
 public static class DumplingExtension
 {
 	public static void Dumplings(this object obj)
