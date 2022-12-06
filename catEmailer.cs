@@ -24,7 +24,7 @@ public class Caller
 		var response = await _caller.GetByteArrayAsync ( "https://cataas.com/cat" );
 		using(Image image = Image.FromStream(new MemoryStream(response)))
 		{
-		    image.Save(@"‪output.jpg", ImageFormat.Jpeg ); 
+		    image.Save(@"output.jpg", ImageFormat.Jpeg ); 
 			SmtpClient SmtpServer = new SmtpClient();
 			SmtpServer.Port = 587;
 			SmtpServer.UseDefaultCredentials = false;
