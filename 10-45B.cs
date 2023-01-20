@@ -21,7 +21,7 @@ async void Main()
 		_logger.Log(LogLevel.WARNING, new Exception("Json warning " + i.ToString()), typeof(JsonLog));
 	}
 	await _dispatch.InvokeAsync();//invoke the delegate on line 9, whose work of reporting is done on a seperate thread, in other words
-	//prior to this point the dispatcher was unaware of the logs which the ILogger was gather, now they are now being reported to the dispatcher
+	//prior to this point the dispatcher was unaware of the logs which the ILogger gathered, they are now being reported to the dispatcher
 	
 	
 	
@@ -36,8 +36,8 @@ async void Main()
 	
 	
 	await _dispatch.InvokeAsync();
-	_logger = _jsonLogger;
-	//_dispatch.ELKPush(_logger);
+	_logger = _jsonLogger;//we want the "json logs" in this case
+	//_dispatch.ELKPush(_logger);//the actual push to elastic
 
 	_dispatch.Status -= (() =>{});//unsub
 	_dispatch.Storage[_logger].Dump();
@@ -59,7 +59,7 @@ public class LogDispatcher
 	~LogDispatcher()
 	{
 		Status = null;//force unsub.
-		_http.Dispose();//only the dispatcher will have access to the caller. The the application should take care of disposal in a genuine enviornment
+		_http.Dispose();//only the dispatcher will have access to the caller. The application should take care of disposal in a genuine enviornment
 	}
 
 	private readonly HttpClient _http;
@@ -89,15 +89,16 @@ public class LogDispatcher
 			sb.AppendLine();
 			sb.Append(JsonSerializer.Serialize(log));
 			sb.AppendLine();
+			//formatting the body for elastic _bulk consumption/ep
 		}
 		StringContent data = new (sb.ToString() +"\n", Encoding.UTF8, "application/json");
 		//kibana endpoint
 		string kib = "YOUR KIBANA EP";
 		//elastic endpoint
 		string el = "YOUR ELASTIC EP";
-		string ep = "/your index/_bulk";//_doc or _bulk, _bulk insert to mitagate overhead/network cost/bandwidth
+		string ep = "/your index/_bulk";//_doc or _bulk, _bulk insert to mitagate overhead/network cost/bandwidth, _doc for a single push
 		_http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("ApiKey", "YOUR KIBANA API KEY NOT ELASTIC"; //doesnt make sense to me either
-		
+		//"ApiKey {token} is the schema
 		
 		HttpResponseMessage response = await _http.PostAsync(el + ep, data); //yes, the elastic ep with kibana token
 		await response.Content.ReadAsStringAsync().Dump();
@@ -107,7 +108,7 @@ public class LogDispatcher
 public class LogStore
 {
 
-	public Stack<Log> Logs{get;set;} = new();
+	public Stack<Log> Logs{get;set;} = new(); //stack up
 	
 }
 
@@ -128,13 +129,13 @@ public class JsonLogger : ILogger
 	}
 	private LogStore Logs{get;set;}
 
-	public void Log<TState>(LogLevel logLevel, Exception? ex)  where TState : Log, new()
+	public void Log<TState>(LogLevel logLevel, Exception? ex)  where TState : Log, new()//mirror with clause: https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.ilogger.log?view=dotnet-plat-ext-7.0#microsoft-extensions-logging-ilogger-log-1(microsoft-extensions-logging-loglevel-microsoft-extensions-logging-eventid-0-system-exception-system-func((-0-system-exception-system-string))) 
 	{
 		TState state = new TState();
 		JsonSerializer.Serialize(state).Dump();
 	}
 	
-	public void Log(LogLevel logLevel, Exception? ex, Type logType)
+	public void Log(LogLevel logLevel, Exception? ex, Type logType) //simplified
 	{
 		JsonLog log = new JsonLog();
 		log.CallingObject = this.GetType().Name;
@@ -191,7 +192,7 @@ public class Log
 {
 	public Log()
 	{
-		LID = Guid.NewGuid();
+		LID = Guid.NewGuid();//https://www.youtube.com/watch?v=xrhkfADEtMU
 	}
 	public Guid LID {get;set;}
 	public string CallingObject{get;set;}
