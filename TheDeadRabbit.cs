@@ -29,7 +29,8 @@ void Main()
 		c+=1;
 	}
 	
-	_provider.Subscriptions[0].OnError(new TargetInvocationException(new ArgumentException("Strong, fruit of weak. Weak, seed of strong.")));
+	_provider.Subscriptions[0].OnError(new TargetInvocationException(new ArgumentException("Strong, fruit of weak. Weak, seed of strong."))); ////https://youtu.be/m0bBBKoc_bg?t=1017
+	
 }
 
 // You can define other methods, fields, classes and namespaces here
