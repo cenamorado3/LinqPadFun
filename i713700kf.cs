@@ -14,12 +14,12 @@ async void Main()
 	Stopwatch sw = new();
 	
 	sw.Start();
-	Parallel.ForEach(pool, thread => 
+	Parallel.ForEach(pool, noodle => //haha pool noodle
 	{
-		thread.Start(rng.Next(lowerBound, upperBound));
+		noodle.Start(rng.Next(lowerBound, upperBound));
 	});
 	sw.Stop();
-	sw.ElapsedMilliseconds.Dump(">>>In Parallel<<<");
+	sw.ElapsedMilliseconds.Dump(">>>In Parallel time to complete in milliseconds<<<");
 	
 	
 	
@@ -30,13 +30,12 @@ async void Main()
 	}
 	
 	sw.Stop();
-	sw.ElapsedMilliseconds.Dump(">>>Async Task<<<");
+	sw.ElapsedMilliseconds.Dump(">>>Async Task time to complete in milliseconds<<<");
 }
 
 // You can define other methods, fields, classes and namespaces here
 class A
 {
-
 	public static void Fib(object o)
 	{
 		int n = (int)o;
