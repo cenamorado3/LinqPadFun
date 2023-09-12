@@ -23,6 +23,7 @@ void Main()
     //"...Clinch..."
 		"Knee",
 		"Faint Knee",
+		"Faint Teep",
 		"Teep"
 	};
 
