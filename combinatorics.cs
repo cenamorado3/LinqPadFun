@@ -18,9 +18,11 @@ void Main()
 		"Body Kick",
 		"Leg Kick",
 		"Thigh Kick",
+		"Feint Kick",
     //"Head Kick",
     //"...Clinch..."
 		"Knee",
+		"Faint Knee",
 		"Teep"
 	};
 
